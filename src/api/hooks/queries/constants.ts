@@ -1,0 +1,2 @@
+export const PROJECTS_LIST_QUERY_KEY = "PROJECTS_LIST";
+export const TASKS_LIST_QUERY_KEY = "TASK_LIST";
