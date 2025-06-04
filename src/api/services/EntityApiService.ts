@@ -42,7 +42,7 @@ class EntityApiService extends MockApiService {
     const data = entityList.slice(startIndex, endIndex);
     const paginatorInfo = {
       page,
-      hasNextPage: !!entityList[endIndex + 1],
+      hasNextPage: !!entityList[endIndex],
       total: entityList.length,
     };
 

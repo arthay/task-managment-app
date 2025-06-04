@@ -6,8 +6,8 @@ import Modal from "@/components/common/Modal";
 import ProjectForm from "@/components/common/forms/ProjectForm";
 
 import type { T_ProjectForm } from "@/components/common/forms/ProjectForm/validation.schema";
-import useCreateProjectMutation from "@/api/hooks/mutations/useCreateProjectMutation";
-import useUpdateProjectMutation from "@/api/hooks/mutations/useUpdateProjectMutation";
+import useCreateProjectMutation from "@/hooks/mutations/useCreateProjectMutation";
+import useUpdateProjectMutation from "@/hooks/mutations/useUpdateProjectMutation";
 import type { I_Project } from "@/types/entities/project";
 
 interface I_ProjectModalProps {

@@ -1,14 +1,13 @@
 import type { Ref, MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Copy, Edit, Trash } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import type { I_Project } from "@/types/entities/project";
 
 interface I_ProjectItemProps {
   project: I_Project;
   ref?: Ref<HTMLDivElement>;
   onEditClick: (id: I_Project["id"]) => void;
-  onDuplicateClick: (id: I_Project["id"]) => void;
   onDeleteClick: (id: I_Project["id"]) => void;
 }
 
@@ -16,7 +15,6 @@ function ProjectItem({
   project,
   ref,
   onEditClick,
-  onDuplicateClick,
   onDeleteClick,
 }: I_ProjectItemProps) {
   const handleCTAClick = (
@@ -42,12 +40,6 @@ function ProjectItem({
             <p className="text-sm text-gray-500">{project.date}</p>
           </div>
           <div className="flex space-x-2">
-            <button
-              onClick={(event) => handleCTAClick(event, onDuplicateClick)}
-              className="text-blue-500 hover:text-blue-700 cursor-pointer"
-            >
-              <Copy className="w-5 h-5" />
-            </button>
             <button
               onClick={(event) => handleCTAClick(event, onEditClick)}
               className="text-blue-500 hover:text-blue-700 cursor-pointer"

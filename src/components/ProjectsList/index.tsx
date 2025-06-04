@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import useProjectsQuery from "@/api/hooks/queries/useProjectsQuery";
+import useProjectsQuery from "@/hooks/queries/useProjectsQuery";
 import ProjectItem from "../ProjectItem";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/loader";
@@ -12,9 +12,8 @@ import {
 } from "@/components/common/forms/ProjectForm/validation.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ConfirmModal from "@/components/common/ConfirmModal";
-import useDeleteProjectMutation from "@/api/hooks/mutations/useDeleteProjectMutation";
+import useDeleteProjectMutation from "@/hooks/mutations/useDeleteProjectMutation";
 import { toast } from "sonner";
-import useDuplicateProjectMutation from "@/api/hooks/mutations/useDuplicateProjectMutation";
 import useLoadMoreEntities from "@/hooks/useLoadMoreEntities";
 
 const projectDefaultValues = {
@@ -32,7 +31,6 @@ function ProjectsList() {
     useProjectsQuery({});
   const { mutateAsync: deleteProject, isPending: isPendingDeleteProject } =
     useDeleteProjectMutation();
-  const { mutateAsync: duplicateProject } = useDuplicateProjectMutation();
 
   const projectForm = useForm<T_ProjectForm>({
     resolver: zodResolver(projectFormSchema),
@@ -59,7 +57,7 @@ function ProjectsList() {
 
   const handleEditProjectClick = (id: I_Project["id"]) => {
     setEditProjectId(id);
-    const project = data?.projects.find((project) => project.id === id);
+    const project = data.projects.find((project) => project.id === id);
     projectForm.reset({
       name: project?.name || projectDefaultValues.name,
       date: new Date(project?.date || ""),
@@ -84,10 +82,6 @@ function ProjectsList() {
     } catch {
       toast("Something went wrong.");
     }
-  };
-
-  const handleDuplicateProjectClick = (id: I_Project["id"]) => {
-    duplicateProject(id);
   };
 
   return (
@@ -122,7 +116,7 @@ function ProjectsList() {
           <div className="w-full flex justify-center">
             <Loader />
           </div>
-        ) : !data?.projects?.length ? (
+        ) : !data.projects.length ? (
           <div>There are no projects yet.</div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
@@ -135,7 +129,6 @@ function ProjectsList() {
                   project={project}
                   ref={ref}
                   onEditClick={handleEditProjectClick}
-                  onDuplicateClick={handleDuplicateProjectClick}
                   onDeleteClick={handleDeleteProjectClick}
                 />
               );
