@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { TASKS_LIST_QUERY_KEY } from "./constants";
-import taskService from "@/api/services/TaskService";
+import taskApiService from "@/api/services/TaskApiService";
 import type { I_TasksListRequestParams } from "@/types/api/project";
 
 const useTasksQuery = ({
@@ -14,7 +14,7 @@ const useTasksQuery = ({
   const queryData = useInfiniteQuery({
     queryKey: [TASKS_LIST_QUERY_KEY, pageSize, projectId, status, priority],
     queryFn: ({ pageParam }) =>
-      taskService.getEntitiesList({
+      taskApiService.getEntitiesListByProjectId({
         page: pageParam,
         pageSize,
         status,

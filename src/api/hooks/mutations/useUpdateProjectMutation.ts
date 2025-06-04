@@ -2,14 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { I_Project } from "@/types/entities/project";
 import { PROJECTS_LIST_QUERY_KEY } from "@/api/hooks/queries/constants";
-import projectService from "@/api/services/ProjectService";
+import projectApiService from "@/api/services/ProjectApiService";
 
 const useUpdateProjectMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: I_Project) =>
-      projectService.updateEntity<I_Project>(data),
+      projectApiService.updateEntity<I_Project>(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PROJECTS_LIST_QUERY_KEY] });
     },

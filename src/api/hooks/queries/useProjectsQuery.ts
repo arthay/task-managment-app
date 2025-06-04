@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { PROJECTS_LIST_QUERY_KEY } from "./constants";
-import projectService from "@/api/services/ProjectService";
+import projectApiService from "@/api/services/ProjectApiService";
 import type { I_Project } from "@/types/entities/project";
 import type { I_QueryParams } from "@/types/api/general";
 
@@ -9,7 +9,7 @@ const useProjectsQuery = ({ page = 1, pageSize = 10 }: I_QueryParams) => {
   const queryData = useInfiniteQuery({
     queryKey: [PROJECTS_LIST_QUERY_KEY],
     queryFn: ({ pageParam }) =>
-      projectService.getEntities<I_Project>({ page: pageParam, pageSize }),
+      projectApiService.getEntities<I_Project>({ page: pageParam, pageSize }),
     initialPageParam: page,
     getNextPageParam: (lastPage) =>
       lastPage && lastPage.paginatorInfo.hasNextPage
