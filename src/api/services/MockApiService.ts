@@ -9,9 +9,7 @@ class MockApiService {
   ): Promise<TResponseData> {
     await this.delay(delay);
     if (!localStorage.getItem("token")) {
-      throw new Error("Unauthorized", {
-        cause: { status: 401 },
-      });
+      throw "Unauthorized";
     }
 
     return await action();
