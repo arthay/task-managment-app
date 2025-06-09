@@ -5,10 +5,13 @@ module.exports = {
     "<rootDir>/src/testUtils/setupTests.ts",
     "<rootDir>/jest.setup.ts",
   ],
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.jest.json",
-    },
+  transform: {
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        tsconfig: "<rootDir>/tsconfig.jest.json",
+      },
+    ],
   },
 
   moduleNameMapper: {

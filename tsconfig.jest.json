@@ -2,8 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "module": "nodenext",
-
+    "module": "nodenext"
   },
   "include": ["src/**/*", "tests/**/*"]
 }
