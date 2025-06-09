@@ -1,5 +1,5 @@
-import { type ReactNode, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { type ReactNode } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 interface I_PrivateRouteProps {
@@ -7,13 +7,12 @@ interface I_PrivateRouteProps {
 }
 
 function PrivateRoute({ children }: I_PrivateRouteProps) {
+  const isAuthenticated = !!localStorage.getItem("token");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      navigate("/login", { replace: true });
-    }
-  }, [navigate]);
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace={true} />;
+  }
 
   const handleLogoutClick = () => {
     localStorage.removeItem("token");
