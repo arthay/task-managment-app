@@ -2,7 +2,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { TASKS_LIST_QUERY_KEY } from "./constants";
 import taskApiService from "@/api/services/TaskApiService";
-import type { I_TasksListRequestParams } from "@/types/api/project";
+import type { I_TasksListRequestParams } from "@/types/api/task";
 
 const useTasksQuery = ({
   page = 1,

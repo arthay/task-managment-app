@@ -8,18 +8,20 @@ class ProjectApiService extends EntityApiService {
   }
 
   async deleteEntity(id: I_Project["id"]): Promise<null> {
-    const projectTasks = await taskApiService.getEntities(
-      {},
-      { key: "projectId", value: id },
-    );
+    return await this.request<null>(async () => {
+      const projectTasks = await taskApiService.getEntities(
+        {},
+        { key: "projectId", value: id },
+      );
 
-    if (projectTasks.entities && projectTasks.entities.length) {
-      throw new Error("There are some entities assigned to the project.");
-    }
+      if (projectTasks.entities && projectTasks.entities.length) {
+        throw new Error("There are some entities assigned to the project.");
+      }
 
-    await super.deleteEntity<I_Project>(id);
+      await super.deleteEntity<I_Project>(id);
 
-    return null;
+      return null;
+    });
   }
 }
 

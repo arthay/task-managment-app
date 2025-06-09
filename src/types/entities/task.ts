@@ -10,3 +10,8 @@ export interface I_Task {
   status: E_TASK_STATUS;
   date: string;
 }
+
+export type T_TaskSortBy = keyof Omit<
+  I_Task,
+  "id" | "projectId" | "description"
+>;

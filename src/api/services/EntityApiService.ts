@@ -15,117 +15,122 @@ class EntityApiService extends MockApiService {
     params: I_QueryParams,
     filter?: { key: string; value: TFilterValue },
   ): Promise<I_ListResponse<TData>> {
-    await this.delay(1000);
+    return await this.request<I_ListResponse<TData>>(async () => {
+      let entityList = this.storage.getItem<TData[]>();
 
-    let entityList = this.storage.getItem<TData[]>();
+      if (!entityList) {
+        return {
+          entities: [],
+          paginatorInfo: { page: 1, hasNextPage: false, total: 0 },
+        };
+      }
 
-    if (!entityList) {
-      return {
-        entities: [],
-        paginatorInfo: { page: 1, hasNextPage: false, total: 0 },
+      if (filter) {
+        entityList = entityList.filter(
+          (entity) =>
+            (entity as Record<string, unknown>)[filter.key] === filter.value,
+        );
+      }
+
+      const page = params.page || 1;
+      const pageSize = params.pageSize || 10;
+
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+
+      const data = entityList.slice(startIndex, endIndex);
+      const paginatorInfo = {
+        page,
+        hasNextPage: !!entityList[endIndex],
+        total: entityList.length,
       };
-    }
 
-    if (filter) {
-      entityList = entityList.filter(
-        (entity) =>
-          (entity as Record<string, unknown>)[filter.key] === filter.value,
-      );
-    }
-
-    const page = params.page || 1;
-    const pageSize = params.pageSize || 10;
-
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-
-    const data = entityList.slice(startIndex, endIndex);
-    const paginatorInfo = {
-      page,
-      hasNextPage: !!entityList[endIndex],
-      total: entityList.length,
-    };
-
-    return { entities: data, paginatorInfo };
+      return { entities: data, paginatorInfo };
+    });
   }
 
   async createEntity<TData>(data: Omit<TData, "id">): Promise<TData> {
-    await this.delay();
+    return this.request<TData>(async () => {
+      const newEntity = { id: getRandomId(), ...data } as TData;
+      const entityList = this.storage.getItem<TData[]>();
 
-    const newEntity = { id: getRandomId(), ...data } as TData;
-    const entityList = this.storage.getItem<TData[]>();
+      this.storage.setItem(
+        entityList ? [newEntity, ...entityList] : [newEntity],
+      );
 
-    this.storage.setItem(entityList ? [newEntity, ...entityList] : [newEntity]);
-
-    return newEntity;
+      return newEntity;
+    });
   }
 
   async updateEntity<TData extends { id: unknown }>(
     data: TData,
   ): Promise<TData> {
-    await this.delay();
-    const entityList = this.storage.getItem<TData[]>();
+    return await this.request<TData>(async () => {
+      const entityList = this.storage.getItem<TData[]>();
 
-    if (!entityList) {
-      throw new Error("Entity not found");
-    }
+      if (!entityList) {
+        throw new Error("Entity not found");
+      }
 
-    const entityIndex = entityList.findIndex((item) => item.id === data.id);
+      const entityIndex = entityList.findIndex((item) => item.id === data.id);
 
-    if (entityIndex < 0) {
-      throw new Error("Entity not found");
-    }
+      if (entityIndex < 0) {
+        throw new Error("Entity not found");
+      }
 
-    entityList[entityIndex] = {
-      ...entityList[entityIndex],
-      ...data,
-    };
+      entityList[entityIndex] = {
+        ...entityList[entityIndex],
+        ...data,
+      };
 
-    this.storage.setItem(entityList);
+      this.storage.setItem(entityList);
 
-    return entityList[entityIndex];
+      return entityList[entityIndex];
+    });
   }
 
   async duplicateEntity<TData extends { id: unknown; name: string }>(
     id: TData["id"],
   ) {
-    await this.delay();
-    const entityList = this.storage.getItem<TData[]>();
+    return await this.request<TData>(async () => {
+      const entityList = this.storage.getItem<TData[]>();
 
-    if (!entityList) {
-      throw new Error("Entity not found");
-    }
+      if (!entityList) {
+        throw new Error("Entity not found");
+      }
 
-    const entity = entityList.find((item) => item.id === id);
+      const entity = entityList.find((item) => item.id === id);
 
-    if (!entity) {
-      throw new Error("Entity not found");
-    }
+      if (!entity) {
+        throw new Error("Entity not found");
+      }
 
-    const newEntity = {
-      ...entity,
-      name: `${entity.name}(dup)`,
-      id: getRandomId(),
-    };
+      const newEntity = {
+        ...entity,
+        name: `${entity.name}(dup)`,
+        id: getRandomId(),
+      };
 
-    this.storage.setItem([newEntity, ...entityList]);
+      this.storage.setItem([newEntity, ...entityList]);
 
-    return newEntity;
+      return newEntity;
+    });
   }
 
   async deleteEntity<TData extends { id: unknown }>(
     id: TData["id"],
   ): Promise<null> {
-    await this.delay();
-    const entityList = this.storage.getItem<TData[]>();
+    return await this.request<null>(async () => {
+      const entityList = this.storage.getItem<TData[]>();
 
-    if (!entityList) {
-      throw new Error("Entity not found");
-    }
+      if (!entityList) {
+        throw new Error("Entity not found");
+      }
 
-    this.storage.setItem(entityList.filter((entity) => entity.id !== id));
+      this.storage.setItem(entityList.filter((entity) => entity.id !== id));
 
-    return null;
+      return null;
+    });
   }
 }
 

@@ -11,7 +11,11 @@ import {
 const projectSlice = createSlice({
   name: "project",
   initialState,
-  reducers: {},
+  reducers: {
+    resetState() {
+      return initialState;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(deleteProject.pending, (state) => {
       state.isDeletePending = true;
@@ -56,6 +60,26 @@ const projectSlice = createSlice({
     builder.addCase(deleteProject.fulfilled, (state, { payload }) => {
       state.entities = state.entities.filter((entity) => entity.id !== payload);
 
+      state.isDeletePending = false;
+    });
+    builder.addCase(fetchProjects.rejected, (state, { error }) => {
+      state.error = error as Error;
+      state.isFetchPending = false;
+    });
+    builder.addCase(fetchNextPageProjects.rejected, (state, { error }) => {
+      state.error = error as Error;
+      state.isFetchingNextPage = false;
+    });
+    builder.addCase(createProject.rejected, (state, { error }) => {
+      state.error = error as Error;
+      state.isCreatePending = false;
+    });
+    builder.addCase(updateProject.rejected, (state, { error }) => {
+      state.error = error as Error;
+      state.isUpdatePending = false;
+    });
+    builder.addCase(deleteProject.rejected, (state, { error }) => {
+      state.error = error as Error;
       state.isDeletePending = false;
     });
   },

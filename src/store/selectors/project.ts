@@ -17,3 +17,5 @@ export const getProjectIsDeletePending = (state: T_RootState) =>
   getProjectState(state).isDeletePending;
 export const getProjectIsFetchingNextPage = (state: T_RootState) =>
   getProjectState(state).isFetchingNextPage;
+export const getProjectError = (state: T_RootState) =>
+  getProjectState(state).error;

@@ -14,3 +14,5 @@ export interface I_ListResponse<TData> {
   entities: TData[];
   paginatorInfo: I_PaginatorInfo;
 }
+
+export type T_SortOrder = "asc" | "desc";

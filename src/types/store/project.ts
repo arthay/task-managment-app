@@ -1,11 +1,7 @@
 import type { I_Project } from "@/types/entities/project";
 
-export interface I_ProjectStore {
+import type { I_EntityStory } from "@/types/store/entity";
+
+export interface I_ProjectStore extends I_EntityStory {
   entities: I_Project[];
-  hasNextPage: boolean;
-  isFetchPending: boolean;
-  isCreatePending: boolean;
-  isUpdatePending: boolean;
-  isDeletePending: boolean;
-  isFetchingNextPage: boolean;
 }

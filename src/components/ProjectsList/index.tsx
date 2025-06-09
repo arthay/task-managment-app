@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import useProjectsQuery from "@/hooks/queries/useProjectsQuery";
 import ProjectItem from "../ProjectItem";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import ConfirmModal from "@/components/common/ConfirmModal";
 import useDeleteProjectMutation from "@/hooks/mutations/useDeleteProjectMutation";
 import { toast } from "sonner";
 import useLoadMoreEntities from "@/hooks/useLoadMoreEntities";
+import testIds from "@/components/ProjectsList/testIds";
+import useUnauthorize from "@/hooks/useUnauthorize";
 
 const projectDefaultValues = {
   name: "",
@@ -27,8 +29,14 @@ function ProjectsList() {
   const [editProjectId, setEditProjectId] = useState<I_Project["id"]>("");
   const [deleteProjectId, setDeleteProjectId] = useState<I_Project["id"]>("");
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } =
-    useProjectsQuery({});
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isPending,
+    error,
+  } = useProjectsQuery({});
   const { mutateAsync: deleteProject, isPending: isPendingDeleteProject } =
     useDeleteProjectMutation();
 
@@ -38,22 +46,24 @@ function ProjectsList() {
     reValidateMode: "onChange",
   });
 
+  const lastProjectRef = useLoadMoreEntities(
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  );
+
+  useUnauthorize(error);
+
   const handleCloseProjectModal = () => {
     setIsModalOpen(false);
     setEditProjectId("");
     projectForm.reset(projectDefaultValues);
   };
 
-  const handleCloseDeleteProjectModal = useCallback(() => {
+  const handleCloseDeleteProjectModal = () => {
     setIsDeleteModalOpen(false);
     setDeleteProjectId("");
-  }, []);
-
-  const lastProjectRef = useLoadMoreEntities(
-    fetchNextPage,
-    isFetchingNextPage,
-    hasNextPage,
-  );
+  };
 
   const handleEditProjectClick = (id: I_Project["id"]) => {
     setEditProjectId(id);
@@ -106,6 +116,7 @@ function ProjectsList() {
         <div className="flex justify-between">
           <h1 className="text-xl font-bold mb-4">Projects List</h1>
           <Button
+            data-testid={testIds.createButton}
             className="cursor-pointer"
             onClick={() => setIsModalOpen(true)}
           >
@@ -113,11 +124,14 @@ function ProjectsList() {
           </Button>
         </div>
         {isPending ? (
-          <div className="w-full flex justify-center">
+          <div
+            data-testid={testIds.projectsLoading}
+            className="w-full flex justify-center"
+          >
             <Loader />
           </div>
         ) : !data.projects.length ? (
-          <div>There are no projects yet.</div>
+          <div data-testid={testIds.noProjects}>There are no projects yet.</div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {data.projects.map((project, index) => {

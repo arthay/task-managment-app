@@ -1,17 +1,8 @@
-import { useCallback, useState } from "react";
-import useTasksQuery from "@/api/hooks/queries/useTasksQuery";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectGroup,
-  SelectLabel,
-} from "@/components/ui/select";
+import { useState } from "react";
+import useTasksQuery from "@/hooks/queries/useTasksQuery";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/loader";
-import type { I_Task } from "@/types/entities/task";
+import type { I_Task, T_TaskSortBy } from "@/types/entities/task";
 import { useForm } from "react-hook-form";
 import {
   taskFormSchema,
@@ -22,10 +13,30 @@ import ConfirmModal from "@/components/common/ConfirmModal";
 import { toast } from "sonner";
 import { E_TASK_PRIORITY, E_TASK_STATUS } from "@/types/enums/task";
 import { useParams } from "react-router-dom";
-import useDeleteTaskMutation from "@/api/hooks/mutations/useDeleteTaskMutation";
+import useDeleteTaskMutation from "@/hooks/mutations/useDeleteTaskMutation";
 import TaskModal from "@/components/common/TaskModal";
 import useLoadMoreEntities from "@/hooks/useLoadMoreEntities";
 import TaskItem from "@/components/TaskItem";
+import Dropdown from "@/components/common/Dropdown";
+import {
+  TASK_PRIORITY_FILTER_OPTIONS,
+  TASK_SORT_BY_OPTIONS,
+  TASK_SORT_ORDER_OPTIONS,
+  TASK_STATUS_FILTER_OPTIONS,
+} from "@/components/TasksList/constants";
+import { Trash } from "lucide-react";
+import type { T_SortOrder } from "@/types/api/general";
+import useUnauthorize from "@/hooks/useUnauthorize";
+
+interface I_FilterState {
+  priority?: E_TASK_PRIORITY;
+  status?: E_TASK_STATUS;
+}
+
+interface I_SortState {
+  by?: T_TaskSortBy;
+  order?: T_SortOrder;
+}
 
 const taskDefaultValues = {
   title: "",
@@ -36,25 +47,29 @@ const taskDefaultValues = {
 };
 
 function TasksList() {
+  const [filters, setFilters] = useState<I_FilterState>({});
+  const [sorting, setSorting] = useState<I_SortState>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editTaskId, setEditTaskId] = useState<I_Task["id"]>("");
   const [deleteTaskId, setDeleteTaskId] = useState<I_Task["id"]>("");
-  const [selectedStatus, setSelectedStatus] = useState<
-    E_TASK_STATUS | undefined
-  >();
-  const [selectedPriority, setSelectedPriority] = useState<
-    E_TASK_PRIORITY | undefined
-  >();
 
   const { projectId } = useParams();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } =
-    useTasksQuery({
-      projectId: projectId || "",
-      status: selectedStatus,
-      priority: selectedPriority,
-    });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isPending,
+    error,
+  } = useTasksQuery({
+    projectId: projectId || "",
+    status: filters.status,
+    priority: filters.priority,
+    sortBy: sorting.by,
+    sortOrder: sorting.order,
+  });
   const { mutateAsync: deleteTask, isPending: isPendingDeleteTask } =
     useDeleteTaskMutation();
 
@@ -64,22 +79,24 @@ function TasksList() {
     reValidateMode: "onChange",
   });
 
+  const lastTaskRef = useLoadMoreEntities(
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  );
+
+  useUnauthorize(error);
+
   const handleCloseTaskModal = () => {
     setIsModalOpen(false);
     setEditTaskId("");
     taskForm.reset(taskDefaultValues);
   };
 
-  const handleCloseDeleteTaskModal = useCallback(() => {
+  const handleCloseDeleteTaskModal = () => {
     setIsDeleteModalOpen(false);
     setDeleteTaskId("");
-  }, []);
-
-  const lastTaskRef = useLoadMoreEntities(
-    fetchNextPage,
-    isFetchingNextPage,
-    hasNextPage,
-  );
+  };
 
   const handleEditTaskClick = (id: I_Task["id"]) => {
     setEditTaskId(id);
@@ -108,6 +125,34 @@ function TasksList() {
     } catch {
       toast("Something went wrong.");
     }
+  };
+
+  const handleFilterChange = (
+    key: keyof I_FilterState,
+    value: E_TASK_PRIORITY | E_TASK_STATUS,
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleSortingChange = (
+    key: keyof I_SortState,
+    value: I_SortState["by"] | I_SortState["order"],
+  ) => {
+    setSorting((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleResetFilter = () => {
+    setFilters({});
+  };
+
+  const handleResetSorting = () => {
+    setSorting({});
   };
 
   return (
@@ -141,70 +186,57 @@ function TasksList() {
         </div>
         <div className="flex flex-col gap-2 flex-1 min-h-0">
           <div className="flex gap-2">
-            <Select
+            <Dropdown
+              placeholder="Filter by priority"
+              value={filters.priority}
+              defaultValue={filters.priority}
+              options={TASK_PRIORITY_FILTER_OPTIONS}
               onValueChange={(value) =>
-                setSelectedPriority(value as E_TASK_PRIORITY)
+                handleFilterChange("priority", value as E_TASK_PRIORITY)
               }
-            >
-              <SelectTrigger className="w-full cursor-pointer">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Statuses</SelectLabel>
-                  <SelectItem
-                    className="cursor-pointer"
-                    value={E_TASK_PRIORITY.LOW}
-                  >
-                    {E_TASK_PRIORITY.LOW}
-                  </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer"
-                    value={E_TASK_PRIORITY.MEDIUM}
-                  >
-                    {E_TASK_PRIORITY.MEDIUM}
-                  </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer"
-                    value={E_TASK_PRIORITY.HIGH}
-                  >
-                    {E_TASK_PRIORITY.HIGH}
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Select
+            />
+            <Dropdown
+              placeholder="Filter by status"
+              value={filters.status}
+              defaultValue={filters.status}
               onValueChange={(value) =>
-                setSelectedStatus(value as E_TASK_STATUS)
+                handleFilterChange("status", value as E_TASK_STATUS)
               }
+              options={TASK_STATUS_FILTER_OPTIONS}
+            />
+            <Button
+              disabled={!filters.priority && !filters.status}
+              className="cursor-pointer"
+              onClick={handleResetFilter}
             >
-              <SelectTrigger className="w-full cursor-pointer">
-                <SelectValue placeholder="Filter by priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Priorities</SelectLabel>
-                  <SelectItem
-                    className="cursor-pointer"
-                    value={E_TASK_STATUS.PENDING}
-                  >
-                    {E_TASK_STATUS.PENDING}
-                  </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer"
-                    value={E_TASK_STATUS.IN_PROGRESS}
-                  >
-                    {E_TASK_STATUS.IN_PROGRESS}
-                  </SelectItem>
-                  <SelectItem
-                    className="cursor-pointer"
-                    value={E_TASK_STATUS.COMPLETED}
-                  >
-                    {E_TASK_STATUS.COMPLETED}
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+              <Trash />
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Dropdown
+              placeholder="Sort By"
+              value={sorting.by}
+              options={TASK_SORT_BY_OPTIONS}
+              onValueChange={(value) =>
+                handleSortingChange("by", value as I_SortState["by"])
+              }
+            />
+            <Dropdown
+              placeholder="Sort Order"
+              disabled={!sorting.by}
+              value={sorting.order}
+              onValueChange={(value) =>
+                handleSortingChange("order", value as I_SortState["order"])
+              }
+              options={TASK_SORT_ORDER_OPTIONS}
+            />
+            <Button
+              disabled={!sorting.order && !sorting.by}
+              className="cursor-pointer"
+              onClick={handleResetSorting}
+            >
+              <Trash />
+            </Button>
           </div>
           {isPending ? (
             <div className="w-full flex justify-center">

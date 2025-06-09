@@ -6,8 +6,8 @@ import Modal from "@/components/common/Modal";
 import TaskForm from "@/components/common/forms/TaskForm";
 
 import type { T_TaskForm } from "@/components/common/forms/TaskForm/validation.schema";
-import useCreateTaskMutation from "@/api/hooks/mutations/useCreateTaskMutation";
-import useUpdateTaskMutation from "@/api/hooks/mutations/useUpdateTaskMutation";
+import useCreateTaskMutation from "@/hooks/mutations/useCreateTaskMutation";
+import useUpdateTaskMutation from "@/hooks/mutations/useUpdateTaskMutation";
 import type { I_Task } from "@/types/entities/task";
 import type { I_Project } from "@/types/entities/project";
 

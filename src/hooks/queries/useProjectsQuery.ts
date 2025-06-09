@@ -10,6 +10,7 @@ import {
   getProjectHasNextPage,
   getProjectIsFetchPending,
   getProjectIsFetchingNextPage,
+  getProjectError,
 } from "@/store/selectors/project";
 import type { I_QueryParams } from "@/types/api/general";
 import useAppDispatch from "@/hooks/useAppDispatch";
@@ -22,26 +23,27 @@ const useProjectsQuery = ({
 }: I_QueryParams) => {
   const dispatch = useAppDispatch();
 
-  const { projects, hasNextPage, isFetchPending, isFetchingNextPage } =
+  const { projects, hasNextPage, isFetchPending, isFetchingNextPage, error } =
     useSelector((state: T_RootState) => ({
       projects: getProjectEntities(state),
       hasNextPage: getProjectHasNextPage(state),
       isFetchPending: getProjectIsFetchPending(state),
       isFetchingNextPage: getProjectIsFetchingNextPage(state),
+      error: getProjectError(state),
     }));
 
   useEffect(() => {
     if (projects.length === 0) {
       dispatch(fetchProjects({ page, pageSize }));
     }
-  }, [dispatch, projects.length]);
+  }, [dispatch, page, pageSize, projects.length]);
 
   const fetchNextPage = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       const nextPage = Math.floor(projects.length / PAGE_SIZE) + 1;
       dispatch(fetchNextPageProjects({ page: nextPage, pageSize }));
     }
-  }, [dispatch, projects.length, hasNextPage, isFetchingNextPage]);
+  }, [hasNextPage, isFetchingNextPage, projects.length, dispatch, pageSize]);
 
   return {
     data: { projects },
@@ -49,6 +51,7 @@ const useProjectsQuery = ({
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
+    error,
   };
 };
 
