@@ -30,6 +30,14 @@ Uses Zod for input validation (e.g., login forms) to maintain data integrity and
 - **Responsive Design:**
   Tailwind CSS is used to build a mobile-first, responsive design that adapts seamlessly to a diverse range of devices.
 
+- **Login Functionality:**
+  For login, you can use any username and password as long as they meet the following validation criteria:
+   - Username must be at least 4 characters long.
+   - Password must be at least 6 characters long.
+
+This approach allows flexibility during development and testing, ensuring you can simulate user authentication with valid credentials.
+
+
 ## Technologies Used
 - **React & TypeScript:**
   Build scalable and type-safe user interfaces with a component-based architecture.
