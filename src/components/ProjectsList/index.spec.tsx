@@ -1,4 +1,3 @@
-import type { Ref } from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import * as sonner from "sonner";
 import ProjectsList from "@/components/ProjectsList";
@@ -10,7 +9,7 @@ import projectItemTestIds from "@/components/ProjectItem/testIds";
 import ConfirmModalMock, {
   type I_ConfirmModalMockProps,
 } from "@/testUtils/mocks/components/ConfirmModalMock";
-import type { I_Project } from "@/types/entities/project";
+import { MemoryRouter } from "react-router-dom";
 
 jest.mock("@/hooks/queries/useProjectsQuery");
 jest.mock("@/hooks/mutations/useDeleteProjectMutation");
@@ -40,43 +39,19 @@ jest.mock("@/components/common/ConfirmModal", () => ({
   default: (props: I_ConfirmModalMockProps) => <ConfirmModalMock {...props} />,
 }));
 
-jest.mock("@/components/ProjectItem", () => ({
-  __esModule: true,
-  default: (
-    {
-      project,
-      onEditClick,
-      onDeleteClick,
-    }: {
-      project: I_Project;
-      onEditClick: (id: string) => void;
-      onDeleteClick: (id: string) => void;
-    },
-    ref: Ref<HTMLDivElement>,
-  ) => (
-    <div ref={ref} data-testid={testIds.projectItem}>
-      <div>{project.name}</div>
-      <button
-        data-testid={projectItemTestIds.editProjectButton}
-        onClick={() => onEditClick(project.id)}
-      >
-        Edit
-      </button>
-      <button
-        data-testid={projectItemTestIds.deleteProjectButton}
-        onClick={() => onDeleteClick(project.id)}
-      >
-        Delete
-      </button>
-    </div>
-  ),
-}));
-
 describe("ProjectsList", () => {
   const fakeProjects = [
     { id: "1", name: "Project 1", date: new Date().toISOString() },
     { id: "2", name: "Project 2", date: new Date().toISOString() },
   ];
+
+  const renderComponent = () => {
+    render(
+      <MemoryRouter>
+        <ProjectsList />
+      </MemoryRouter>,
+    );
+  };
 
   const mockFetchNextPage = jest.fn();
   const mockDeleteProject = jest.fn().mockResolvedValue(undefined);
@@ -110,7 +85,7 @@ describe("ProjectsList", () => {
       isPending: true,
     });
 
-    render(<ProjectsList />);
+    renderComponent();
     expect(screen.getByTestId(testIds.projectsLoading)).toBeInTheDocument();
   });
 
@@ -123,14 +98,14 @@ describe("ProjectsList", () => {
       isPending: false,
     });
 
-    render(<ProjectsList />);
+    renderComponent();
     expect(screen.getByTestId(testIds.noProjects)).toBeInTheDocument();
   });
 
   it("renders a list of projects", () => {
-    render(<ProjectsList />);
+    renderComponent();
 
-    const items = screen.getAllByTestId(testIds.projectItem);
+    const items = screen.getAllByTestId(projectItemTestIds.projectItem);
     expect(items.length).toBe(fakeProjects.length);
 
     fakeProjects.forEach((project) => {
@@ -139,7 +114,7 @@ describe("ProjectsList", () => {
   });
 
   it('opens project modal when "Create Project" button is clicked', () => {
-    render(<ProjectsList />);
+    renderComponent();
 
     expect(screen.getByTestId(testIds.projectModal)).toHaveTextContent(
       "ProjectModal Closed",
@@ -153,7 +128,7 @@ describe("ProjectsList", () => {
   });
 
   it('closes project modal when "Close Modal" button is clicked', () => {
-    render(<ProjectsList />);
+    renderComponent();
     const createButton = screen.getByTestId(testIds.createButton);
     fireEvent.click(createButton);
 
@@ -166,7 +141,7 @@ describe("ProjectsList", () => {
   });
 
   it('opens project modal for editing when "Edit" button is clicked', () => {
-    render(<ProjectsList />);
+    renderComponent();
 
     const editButtons = screen.getAllByTestId(
       projectItemTestIds.editProjectButton,
@@ -178,9 +153,8 @@ describe("ProjectsList", () => {
   });
 
   it('opens confirm modal when "Delete" button is clicked and triggers deletion', async () => {
-    // const toastSuccessSpy = jest.spyOn(toast, "success").mockImplementation();
     const toastSpy = jest.spyOn(sonner, "toast");
-    render(<ProjectsList />);
+    renderComponent();
 
     const deleteButtons = screen.getAllByTestId(
       projectItemTestIds.deleteProjectButton,

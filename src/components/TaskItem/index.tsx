@@ -1,10 +1,10 @@
 import type { Ref, MouseEvent } from "react";
-import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Edit, Trash } from "lucide-react";
 import type { I_Task } from "@/types/entities/task";
 import { cn } from "@/lib/utils";
 import { priorityClasses } from "@/components/TaskItem/constants";
+import testIds from "@/components/TaskItem/testIds";
 
 interface I_TaskItemProps {
   task: I_Task;
@@ -24,7 +24,7 @@ function TaskItem({ task, ref, onEditClick, onDeleteClick }: I_TaskItemProps) {
   };
 
   return (
-    <Link to={`/tasks/${task.id}`}>
+    <div data-testid={testIds.taskItem}>
       <Card
         ref={ref}
         className="p-4 mb-4 shadow-lg hover:shadow-xl transition-shadow duration-300 animate-fade-in"
@@ -49,12 +49,14 @@ function TaskItem({ task, ref, onEditClick, onDeleteClick }: I_TaskItemProps) {
           </div>
           <div className="flex space-x-2">
             <button
+              data-testid={testIds.editTaskButton}
               onClick={(event) => handleCTAClick(event, onEditClick)}
               className="text-blue-500 hover:text-blue-700 cursor-pointer"
             >
               <Edit className="w-5 h-5" />
             </button>
             <button
+              data-testid={testIds.deleteTaskButton}
               onClick={(event) => handleCTAClick(event, onDeleteClick)}
               className="text-red-500 hover:text-red-700 cursor-pointer"
             >
@@ -63,7 +65,7 @@ function TaskItem({ task, ref, onEditClick, onDeleteClick }: I_TaskItemProps) {
           </div>
         </div>
       </Card>
-    </Link>
+    </div>
   );
 }
 

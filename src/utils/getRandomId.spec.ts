@@ -1,5 +1,15 @@
-function getRandomId(): string {
-  return Math.random().toString(36).substring(2, 9) + Date.now();
-}
+import getRandomId from "./getRandomId";
 
-export default getRandomId;
+describe("getRandomId", () => {
+  it("should return a string", () => {
+    const id = getRandomId();
+    expect(typeof id).toBe("string");
+    expect(id).not.toHaveLength(0);
+  });
+
+  it("should return a unique id on subsequent calls", () => {
+    const firstId = getRandomId();
+    const secondId = getRandomId();
+    expect(firstId).not.toBe(secondId);
+  });
+});

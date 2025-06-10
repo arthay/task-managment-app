@@ -1,36 +1,103 @@
-import { useCallback, useRef } from "react";
+import { renderHook } from "@testing-library/react";
+import useLoadMoreEntities from "./useLoadMoreEntities";
 
-const useLoadMoreEntities = (
-  fetchNextPage: () => void,
-  isFetchingNextPage: boolean,
-  hasNextPage: boolean,
-) => {
-  const observer = useRef<IntersectionObserver | null>(null);
+describe("useLoadMoreEntities", () => {
+  let mockObserve: jest.Mock;
+  let mockDisconnect: jest.Mock;
+  let intersectionCallback: IntersectionObserverCallback;
 
-  const lastEntityRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (isFetchingNextPage) {
-        return;
-      }
+  beforeEach(() => {
+    mockObserve = jest.fn();
+    mockDisconnect = jest.fn();
 
-      if (observer.current) {
-        observer.current.disconnect();
-      }
+    window.IntersectionObserver = jest.fn((callback) => {
+      intersectionCallback = callback;
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
-      });
+      return {
+        observe: mockObserve,
+        disconnect: mockDisconnect,
+      } as unknown as IntersectionObserver;
+    });
+  });
 
-      if (node) {
-        observer.current.observe(node);
-      }
-    },
-    [isFetchingNextPage, fetchNextPage, hasNextPage],
-  );
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-  return lastEntityRef;
-};
+  it("should observe the node and call fetchNextPage when intersecting and hasNextPage is true", () => {
+    const fetchNextPage = jest.fn();
+    const isFetchingNextPage = false;
+    const hasNextPage = true;
+    const { result } = renderHook(() =>
+      useLoadMoreEntities(fetchNextPage, isFetchingNextPage, hasNextPage),
+    );
 
-export default useLoadMoreEntities;
+    const div = document.createElement("div");
+    result.current(div);
+
+    expect(window.IntersectionObserver).toHaveBeenCalled();
+    expect(mockObserve).toHaveBeenCalledWith(div);
+
+    intersectionCallback(
+      [{ isIntersecting: true } as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    );
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("should not call fetchNextPage when intersecting if hasNextPage is false", () => {
+    const fetchNextPage = jest.fn();
+    const isFetchingNextPage = false;
+    const hasNextPage = false;
+    const { result } = renderHook(() =>
+      useLoadMoreEntities(fetchNextPage, isFetchingNextPage, hasNextPage),
+    );
+
+    const div = document.createElement("div");
+    result.current(div);
+
+    expect(window.IntersectionObserver).toHaveBeenCalled();
+    expect(mockObserve).toHaveBeenCalledWith(div);
+
+    intersectionCallback(
+      [{ isIntersecting: true } as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    );
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it("should not set up observer when isFetchingNextPage is true", () => {
+    const fetchNextPage = jest.fn();
+    const isFetchingNextPage = true;
+    const hasNextPage = true;
+    const { result } = renderHook(() =>
+      useLoadMoreEntities(fetchNextPage, isFetchingNextPage, hasNextPage),
+    );
+
+    const div = document.createElement("div");
+    result.current(div);
+
+    expect(window.IntersectionObserver).not.toHaveBeenCalled();
+    expect(mockObserve).not.toHaveBeenCalled();
+  });
+
+  it("should disconnect previous observer when a new node is provided", () => {
+    const fetchNextPage = jest.fn();
+    const isFetchingNextPage = false;
+    const hasNextPage = true;
+    const { result } = renderHook(() =>
+      useLoadMoreEntities(fetchNextPage, isFetchingNextPage, hasNextPage),
+    );
+
+    const firstDiv = document.createElement("div");
+    result.current(firstDiv);
+    expect(window.IntersectionObserver).toHaveBeenCalledTimes(1);
+    expect(mockObserve).toHaveBeenCalledWith(firstDiv);
+
+    const secondDiv = document.createElement("div");
+    result.current(secondDiv);
+
+    expect(mockDisconnect).toHaveBeenCalled();
+    expect(mockObserve).toHaveBeenCalledWith(secondDiv);
+  });
+});

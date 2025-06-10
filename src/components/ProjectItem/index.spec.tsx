@@ -33,6 +33,10 @@ describe("ProjectItem Component", () => {
   test("renders project details and link correctly", () => {
     renderComponent();
 
+    const projectItem = screen.getByTestId(testIds.projectItem);
+
+    expect(projectItem).toBeInTheDocument();
+
     expect(screen.getByText("Test Project")).toBeInTheDocument();
     expect(screen.getByText("2022-01-01")).toBeInTheDocument();
 

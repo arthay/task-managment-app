@@ -27,6 +27,7 @@ import {
 import { Trash } from "lucide-react";
 import type { T_SortOrder } from "@/types/api/general";
 import useUnauthorize from "@/hooks/useUnauthorize";
+import testIds from "@/components/TasksList/testIds";
 
 interface I_FilterState {
   priority?: E_TASK_PRIORITY;
@@ -178,6 +179,7 @@ function TasksList() {
         <div className="flex justify-between">
           <h1 className="text-xl font-bold mb-4">Tasks List</h1>
           <Button
+            data-testid={testIds.createButton}
             className="cursor-pointer"
             onClick={() => setIsModalOpen(true)}
           >
@@ -239,11 +241,14 @@ function TasksList() {
             </Button>
           </div>
           {isPending ? (
-            <div className="w-full flex justify-center">
+            <div
+              data-testid={testIds.tasksLoading}
+              className="w-full flex justify-center"
+            >
               <Loader />
             </div>
           ) : !data?.tasks?.length ? (
-            <div>There are no tasks yet.</div>
+            <div data-testid={testIds.noTasks}>There are no tasks yet.</div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
               {data.tasks.map((task, index) => {

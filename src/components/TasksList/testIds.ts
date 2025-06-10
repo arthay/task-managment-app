@@ -1,8 +1,8 @@
 export default {
-  projectsLoading: "projects-loading",
-  noProjects: "no-projects",
-  projectItem: "project-item",
-  projectModal: "project-modal",
+  tasksLoading: "tasks-loading",
+  noTasks: "no-tasks",
+  taskItem: "task-item",
+  taskModal: "task-modal",
   createButton: "create-button",
-  closeProjectModal: "close-project-modal",
+  closeTaskModal: "close-task-modal",
 };

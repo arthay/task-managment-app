@@ -1,6 +1,5 @@
 export default {
-  projectItem: "project-item",
-  linkProject: "link-project",
-  editProjectButton: "edit-project-button",
-  deleteProjectButton: "delete-project-button",
+  taskItem: "task-item",
+  editTaskButton: "edit-task-button",
+  deleteTaskButton: "delete-task-button",
 };
