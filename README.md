@@ -98,6 +98,8 @@ This approach allows flexibility during development and testing, ensuring you ca
   Async thunk actions in Redux ensure that API calls and responses (handled by custom API services) update the application state smoothly and predictably.
 - **Mock API Functionality:**
   The application uses mock API services to simulate backend operations, providing a robust environment for development and testing without requiring a live server.
+- **Login:**
+  For login, simply supply any username and password that meet the basic validation rules (username: minimum 4 characters; password: minimum 6 characters). This allows you to quickly start testing the application without strict credentials.
 - **Interactive UI:**
   Built with Shadcn UI and Tailwind CSS, the interface is designed for consistent performance and usability across all devices.
 
